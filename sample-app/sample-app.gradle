@@ -1,0 +1,91 @@
+/*
+ * Copyright 2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.redhat.ceylon.gradle.android'
+//apply from: "$rootDir/gradle/extraAndroidTasks.gradle"
+
+description = 'Sample project showing how to use Ceylon on Android - http://www.ceylon-lang.org'
+
+android {
+  compileSdkVersion 23
+  buildToolsVersion '23.0.2'
+
+  defaultConfig {
+    minSdkVersion 16
+    targetSdkVersion 23
+
+    versionCode 1
+    versionName '1.0.0'
+
+//    signingConfig signingConfigs.debug
+
+    testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+  }
+
+//  signingConfigs {
+//    debug {
+//      storeFile rootProject.file('debug.keystore')
+//      storePassword 'android'
+//      keyAlias 'androiddebugkey'
+//      keyPassword 'android'
+//    }
+//  }
+
+  buildTypes {
+//    debug {
+//      applicationIdSuffix '.dev'
+//    }
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
+
+  lintOptions {
+    disable 'InvalidPackage' // lint sees references in the grooid jar to unavailable java classes
+  }
+}
+
+androidCeylon {
+  options {
+//    configure(ceylonOptions) {
+      // forkOptions.jvmArgs = ['-noverify']
+//    }
+  }
+}
+
+dependencies {
+//  compile 'org.codehaus.groovy:groovy:2.4.5:grooid'
+//  compile 'com.arasthel:swissknife:1.4.0'
+  compile 'com.android.support:appcompat-v7:23.1.1'
+  compile 'com.android.support:design:23.1.1'
+
+  androidTestCompile 'com.android.support.test:runner:0.4.1'
+  androidTestCompile 'com.android.support.test:rules:0.4.1'
+
+  testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
+
+configurations.all {
+  resolutionStrategy.force 'com.android.support:support-annotations:23.0.1'
+}
