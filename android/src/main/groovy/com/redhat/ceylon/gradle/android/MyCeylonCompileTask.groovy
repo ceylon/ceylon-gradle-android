@@ -32,7 +32,11 @@ import org.gradle.api.tasks.compile.AbstractCompile
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
+
 class MyCeylonCompileTask extends AbstractCompile{
+
+  def ceylonExecutable = "/home/stephane/src/java-eclipse/ceylon/dist/dist/bin/ceylon"
+
   private List<File> sourceFolders = new ArrayList<>()
   BaseVariantData<? extends BaseVariantOutputData> variant;
 
@@ -115,8 +119,10 @@ Depends: ${dependencies}
       dx.consumedInputStreams.add(streamBuilder.build())
     }
 
-    def metamodel = new File(mlib, "META-INF/ceylon.metamodel")
-    Files.copy(metamodel.toPath(), new File(resources, metamodel.name).toPath(), StandardCopyOption.REPLACE_EXISTING)
+    def metamodelSource = new File(mlib, "META-INF/ceylon/metamodel")
+    def metamodelDest = new File(resources, "META-INF/ceylon/metamodel")
+    metamodelDest.parentFile.mkdirs()
+    Files.copy(metamodelSource.toPath(), metamodelDest.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
     def streamBuilder = new OriginalStream.Builder()
 
@@ -185,7 +191,7 @@ Depends: ${dependencies}
     }
 
     List<String> args = new ArrayList<>()
-    args.add("/home/stephane/src/java-eclipse/ceylon/dist/dist/bin/ceylon")
+    args.add(ceylonExecutable)
     args.add("import-jar")
     args.add("--out")
     args.add(androidRepo.absolutePath)
@@ -279,7 +285,7 @@ Depends: ${dependencies}
     List<String> args = new ArrayList<>()
     // FIXME: prepopulate ceylon repo androidRepo
     // FIXME: hand over to Ceylon compiler plugin
-    args.add("/home/stephane/src/java-eclipse/ceylon/dist/dist/bin/ceylon")
+    args.add(ceylonExecutable)
     args.add("compile")
     args.add("--rep")
     args.add(androidRepo.absolutePath)
@@ -309,9 +315,10 @@ Depends: ${dependencies}
     def modulesRepo = new File(project.buildDir, "intermediates/ceylon-android/modules")
     List<String> args = new ArrayList<>()
     // FIXME: hand over to Ceylon compiler plugin
-    args.add("/home/stephane/src/java-eclipse/ceylon/dist/dist/bin/ceylon")
+    args.add(ceylonExecutable)
     args.add("jigsaw")
     args.add("create-mlib")
+    args.add("--static-metamodel")
     args.add("--rep")
     args.add(modulesRepo.absolutePath)
     args.add("--rep")
