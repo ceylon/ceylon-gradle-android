@@ -42,7 +42,7 @@ allprojects {
 
 subprojects {
   apply from: "$rootDir/gradle/projectLocalRepo.gradle"
-  apply from: "$rootDir/gradle/androidGroovyLocal.gradle"
+//  apply from: "$rootDir/gradle/androidGroovyLocal.gradle"
 
   repositories {
     jcenter()
