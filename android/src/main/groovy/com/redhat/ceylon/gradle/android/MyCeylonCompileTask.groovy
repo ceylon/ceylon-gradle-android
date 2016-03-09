@@ -233,11 +233,6 @@ Depends: ${dependencies}
 
   }
 
-/*
-  TODO:
-  deal with resources in model and metamodel
-   */
-
   def importDependency(ResolvedDependency dep, Map<String, Dep> deps, String androidVersion){
     def ceylonModuleName = dep.moduleGroup+"."+dep.moduleName
     def key = ceylonModuleName + "/" + dep.moduleVersion
