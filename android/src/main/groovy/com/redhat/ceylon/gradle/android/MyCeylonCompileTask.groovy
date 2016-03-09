@@ -40,6 +40,12 @@ class MyCeylonCompileTask extends AbstractCompile{
   private List<File> sourceFolders = new ArrayList<>()
   BaseVariantData<? extends BaseVariantOutputData> variant;
 
+  MyCeylonCompileTask(){
+    // FIXME: we should figure this one out, but if we don't force this, since our outputs
+    // are passed to android in pre-dexed, and android clears them, we can't tell they're missing
+    outputs.upToDateWhen { false }
+  }
+
   class Dep {
     String name;
     String version;
