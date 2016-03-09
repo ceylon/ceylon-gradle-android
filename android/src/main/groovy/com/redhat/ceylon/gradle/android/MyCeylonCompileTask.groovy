@@ -68,7 +68,20 @@ Depends: ${dependencies}
   protected void compile() {
     project.logger.info("Compiling Ceylon classes in "+ this.source.asPath)
     project.logger.info("Ceylon classpath is "+ classpath.asPath)
-    project.logger.info("Project dependencies: ")
+    project.logger.info("Ceylon source folders is "+ sourceFolders)
+    def moduleFinder = new FileNameFinder();
+    def foundModule = false;
+    for(sourceFolder in sourceFolders){
+      if(!moduleFinder.getFileNames(sourceFolder.absolutePath, '**/module.ceylon').isEmpty()){
+        foundModule = true
+        break
+      }
+    }
+
+    if(!foundModule){
+      project.logger.info("No source module found: we're done")
+      return;
+    }
     def conf = project.configurations.getByName("compile");
 
     def androidPlugin = CeylonAndroidPlugin.getAndroidBasePlugin(project)
