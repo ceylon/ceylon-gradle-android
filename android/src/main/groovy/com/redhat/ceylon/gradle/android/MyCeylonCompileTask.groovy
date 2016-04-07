@@ -35,8 +35,6 @@ import java.nio.file.StandardCopyOption
 
 class MyCeylonCompileTask extends AbstractCompile{
 
-  def ceylonExecutable = "/home/stephane/src/java-eclipse/ceylon/dist/dist/bin/ceylon"
-
   private List<File> sourceFolders = new ArrayList<>()
   BaseVariantData<? extends BaseVariantOutputData> variant;
 
@@ -210,7 +208,7 @@ Depends: ${dependencies}
     }
 
     List<String> args = new ArrayList<>()
-    args.add(ceylonExecutable)
+    args.add(project.androidCeylon.ceylonExecutable)
     args.add("import-jar")
     args.add("--out")
     args.add(androidRepo.absolutePath)
@@ -299,7 +297,7 @@ Depends: ${dependencies}
     List<String> args = new ArrayList<>()
     // FIXME: prepopulate ceylon repo androidRepo
     // FIXME: hand over to Ceylon compiler plugin
-    args.add(ceylonExecutable)
+    args.add(project.androidCeylon.ceylonExecutable)
     args.add("compile")
     args.add("--rep")
     args.add(androidRepo.absolutePath)
@@ -329,7 +327,7 @@ Depends: ${dependencies}
     def modulesRepo = new File(project.buildDir, "intermediates/ceylon-android/modules")
     List<String> args = new ArrayList<>()
     // FIXME: hand over to Ceylon compiler plugin
-    args.add(ceylonExecutable)
+    args.add(project.androidCeylon.ceylonExecutable)
     args.add("jigsaw")
     args.add("create-mlib")
     args.add("--static-metamodel")
@@ -339,8 +337,7 @@ Depends: ${dependencies}
     args.add(androidRepo.absolutePath)
     args.add("--out")
     args.add(outputRepo.absolutePath)
-    // FIXME: figure that one out
-    args.add("fr.epardaud.testjava.testjava/1")
+    args.add(project.androidCeylon.mainModule)
     ProcessBuilder pb = new ProcessBuilder(args)
     pb.redirectError(ProcessBuilder.Redirect.INHERIT)
     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT)

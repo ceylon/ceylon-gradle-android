@@ -43,6 +43,16 @@ class CeylonAndroidExtension {
    */
   boolean skipJavaC
 
+  /**
+   * Absolute path to the ceylon executable.
+   */
+  def ceylonExecutable = "/usr/bin/ceylon"
+
+  /**
+   * Name and version of the main Ceylon module.
+   */
+  def mainModule = "default/1.0"
+
   final NamedDomainObjectContainer<AndroidCeylonSourceSet> sourceSetsContainer
 
   private Closure<Void> configClosure
