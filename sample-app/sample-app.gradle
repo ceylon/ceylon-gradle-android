@@ -17,6 +17,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.redhat.ceylon.gradle.android'
 //apply from: "$rootDir/gradle/extraAndroidTasks.gradle"
+apply plugin: 'com.getkeepsafe.dexcount'
 
 description = 'Sample project showing how to use Ceylon on Android - http://www.ceylon-lang.org'
 

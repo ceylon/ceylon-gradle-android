@@ -112,7 +112,7 @@ Depends: ${dependencies}
     }
 
     project.tasks.matching {
-      it.name.contains('Dex') && it.variantName == variant.name
+      it.name.contains('Dex') && !it.name.contains("DexMethods") && it.variantName == variant.name
     }.each { dx ->
       def streamBuilder = new OriginalStream.Builder()
 
