@@ -22,6 +22,11 @@ buildscript {
 }
 
 apply plugin: 'com.redhat.ceylon.gradle.android'
+
+androidCeylon {
+    ceylonExecutable "/usr/bin/ceylon"
+    mainModule "com.my.module/1.0"
+}
 ```
 
 then use the `assembleDebug` task to test.
