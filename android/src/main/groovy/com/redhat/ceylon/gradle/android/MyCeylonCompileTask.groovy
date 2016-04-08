@@ -152,7 +152,7 @@ Depends: ${dependencies}
   }
 
   def extractResources(File fromJar, String includes, File targetFolder) {
-      def copyTask = project.tasks.create("Extract resources from lib ${fromJar.name}", Copy)
+      def copyTask = project.tasks.create("Extract resources from lib ${fromJar.name} for ${variant.name}", Copy)
       copyTask.from(project.zipTree(fromJar))
       copyTask.include([includes])
       copyTask.destinationDir = targetFolder
@@ -198,7 +198,7 @@ Depends: ${dependencies}
       def rejarDir = new File(project.buildDir, "intermediates/ceylon-android/jars")
       rejarDir.mkdirs()
       def resourcesDir = new File(project.buildDir, "intermediates/classes/debug")
-      def jarTask = project.tasks.create("Rejar ${dep.name}", Jar)
+      def jarTask = project.tasks.create("Rejar ${dep.name} for ${variant.name}", Jar)
       jarTask.from(project.zipTree(dep.jar))
       def includes = dep.resourcePackage.replace('.', '/')+"/*.class"
       jarTask.from(project.fileTree(dir: resourcesDir, includes: [includes]))
