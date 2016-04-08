@@ -21,6 +21,8 @@ import com.android.build.gradle.internal.pipeline.OriginalStream
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.BaseVariantOutputData
 import com.android.sdklib.IAndroidTarget
+import com.athaydes.gradle.ceylon.CeylonConfig
+import com.athaydes.gradle.ceylon.util.CeylonRunner
 import com.google.common.base.Suppliers
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.file.SourceDirectorySet
@@ -31,7 +33,6 @@ import org.gradle.api.tasks.compile.AbstractCompile
 
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-
 
 class MyCeylonCompileTask extends AbstractCompile{
 
@@ -94,9 +95,10 @@ Depends: ${dependencies}
     deps.put("android/"+androidVersion, androidDep)
     conf.resolvedConfiguration.firstLevelModuleDependencies.each{ dep -> importDependency(dep, deps, androidVersion) }
 
-    importJarRepository(deps)
-    runCompiler(androidVersion)
-    runMlib()
+    CeylonConfig ceylonConfig = project.extensions.findByName('ceylon') as CeylonConfig
+    importJarRepository(deps, ceylonConfig)
+    runCompiler(androidVersion, ceylonConfig)
+    runMlib(ceylonConfig)
     addMlibJarsToDex(deps)
   }
 
@@ -157,7 +159,7 @@ Depends: ${dependencies}
       copyTask.execute()
   }
 
-  def importJarRepository(Map<String, Dep> deps) {
+  def importJarRepository(Map<String, Dep> deps, CeylonConfig conf) {
     def imported = new HashSet<String>();
 
     while(imported.size() != deps.size()) {
@@ -168,13 +170,13 @@ Depends: ${dependencies}
         throw new RuntimeException("Failed to find importable dependency from: "+deps)
       for (importableKey in canImport) {
         def dep = deps.get(importableKey)
-        importJar(dep, deps);
+        importJar(dep, deps, conf);
         imported.add(importableKey);
       }
     }
   }
 
-  def importJar(Dep dep, Map<String, Dep> deps) {
+  def importJar(Dep dep, Map<String, Dep> deps, CeylonConfig conf) {
     def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/repository")
     def descriptorsDir = new File(project.buildDir, "intermediates/ceylon-android/descriptors")
     androidRepo.mkdirs()
@@ -207,28 +209,17 @@ Depends: ${dependencies}
       jarFile = rejarTarget
     }
 
-    List<String> args = new ArrayList<>()
-    args.add(project.androidCeylon.ceylonExecutable)
-    args.add("import-jar")
-    args.add("--out")
-    args.add(androidRepo.absolutePath)
+    def options = []
+
+    options << "--out=${androidRepo.absolutePath}"
+
     if(descriptorFile.exists()){
-      args.add("--descriptor")
-      args.add(descriptorFile.absolutePath)
+      options << "--descriptor=${descriptorFile.absolutePath}"
     }
-    args.add(dep.name+"/"+dep.version)
-    args.add(jarFile.absolutePath)
+    options << dep.name + "/" + dep.version
+    options << jarFile.absolutePath
 
-    ProcessBuilder pb = new ProcessBuilder(args)
-    pb.redirectError(ProcessBuilder.Redirect.INHERIT)
-    pb.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-    pb.redirectInput(ProcessBuilder.Redirect.INHERIT)
-    Process p = pb.start()
-    if(p.waitFor() != 0){
-      // FIXME: type?
-      throw new Exception("compile FAIL")
-    }
-
+    CeylonRunner.run("import-jar", "", project, conf, options)
   }
 
   def importDependency(ResolvedDependency dep, Map<String, Dep> deps, String androidVersion){
@@ -291,62 +282,35 @@ Depends: ${dependencies}
     dep.children.each{ dep2 -> importDependency(dep2, deps, androidVersion) }
   }
 
-  def runCompiler(androidVersion) {
+  def runCompiler(androidVersion, CeylonConfig conf) {
     def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/repository")
     def outputRepo = new File(project.buildDir, "intermediates/ceylon-android/modules")
     List<String> args = new ArrayList<>()
     // FIXME: prepopulate ceylon repo androidRepo
-    // FIXME: hand over to Ceylon compiler plugin
-    args.add(project.androidCeylon.ceylonExecutable)
-    args.add("compile")
-    args.add("--rep")
-    args.add(androidRepo.absolutePath)
-    args.add("--out")
-    args.add(outputRepo.absolutePath)
-    args.add("--jdk-provider")
-    args.add("android/"+androidVersion)
-    for(foo in sourceFolders){
-      project.logger.info("Source folder: "+foo)
-      args.add("--src")
-      args.add(foo.absolutePath)
-    }
-    ProcessBuilder pb = new ProcessBuilder(args)
-    pb.redirectError(ProcessBuilder.Redirect.INHERIT)
-    pb.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-    pb.redirectInput(ProcessBuilder.Redirect.INHERIT)
-    Process p = pb.start()
-    if(p.waitFor() != 0){
-      // FIXME: type?
-      throw new Exception("compile FAIL")
-    }
+
+    def options = []
+
+    options << "--rep=${androidRepo.absolutePath}"
+    options << "--out=${outputRepo.absolutePath}"
+    options << "--jdk-provider=android/${androidVersion}"
+    sourceFolders.each { options << "--src $it.absolutePath" }
+
+    CeylonRunner.run("compile", "", project, conf, options)
   }
 
-  def runMlib() {
+  def runMlib(CeylonConfig conf) {
     def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/repository")
     def outputRepo = new File(project.buildDir, "intermediates/ceylon-android/mlib")
     def modulesRepo = new File(project.buildDir, "intermediates/ceylon-android/modules")
-    List<String> args = new ArrayList<>()
-    // FIXME: hand over to Ceylon compiler plugin
-    args.add(project.androidCeylon.ceylonExecutable)
-    args.add("jigsaw")
-    args.add("create-mlib")
-    args.add("--static-metamodel")
-    args.add("--rep")
-    args.add(modulesRepo.absolutePath)
-    args.add("--rep")
-    args.add(androidRepo.absolutePath)
-    args.add("--out")
-    args.add(outputRepo.absolutePath)
-    args.add(project.androidCeylon.mainModule)
-    ProcessBuilder pb = new ProcessBuilder(args)
-    pb.redirectError(ProcessBuilder.Redirect.INHERIT)
-    pb.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-    pb.redirectInput(ProcessBuilder.Redirect.INHERIT)
-    Process p = pb.start()
-    if(p.waitFor() != 0){
-      // FIXME: type?
-      throw new Exception("jigsaw FAIL")
-    }
+
+    def options = []
+
+    options << "--static-metamodel"
+    options << "--rep=${modulesRepo.absolutePath}"
+    options << "--rep=${androidRepo.absolutePath}"
+    options << "--out=${outputRepo.absolutePath}"
+
+    CeylonRunner.run("jigsaw create-mlib", conf.module, project, conf, options)
   }
 
   @Override

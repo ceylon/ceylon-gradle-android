@@ -3,7 +3,8 @@ Ceylon language support for Android
 
 This plugin adds support for writing Android applications using the [Ceylon language](http://ceylon-lang.org).
 
-This plugin is based on the excellent Groovy Android plugin at https://github.com/groovy/groovy-android-gradle-plugin.
+This plugin is based on the excellent [Groovy Android plugin](https://github.com/groovy/groovy-android-gradle-plugin)
+and on [ceylon-gradle-plugin](https://github.com/renatoathaydes/ceylon-gradle-plugin).
 
 Usage
 -----
@@ -21,11 +22,14 @@ buildscript {
     }
 }
 
+apply plugin: 'com.android.application'
+apply plugin: 'com.athaydes.ceylon'
 apply plugin: 'com.redhat.ceylon.gradle.android'
 
-androidCeylon {
-    ceylonExecutable "/usr/bin/ceylon"
-    mainModule "com.my.module/1.0"
+ceylon {
+    // Optional, needs to point to Ceylon 1.2.3+
+    // ceylonLocation "/usr/bin/ceylon"
+    module "com.my.module/1.0"
 }
 ```
 

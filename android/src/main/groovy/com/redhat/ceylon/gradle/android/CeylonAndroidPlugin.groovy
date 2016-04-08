@@ -62,6 +62,11 @@ class CeylonAndroidPlugin implements Plugin<Project> {
         throw new GradleException('You must apply the Android plugin or the Android library plugin before using the ceylon-android plugin')
     }
 
+    def ceylonPlugin = getCeylonPlugin(project)
+    if (!ceylonPlugin) {
+      throw new GradleException('You must apply the com.athaydes.ceylon plugin before using the ceylon-android plugin')
+    }
+
     extension = project.extensions.create(ANDROID_CEYLON_EXTENSION_NAME, CeylonAndroidExtension, project, instantiator, fileResolver)
 
     androidExtension.sourceSets.all { AndroidSourceSet sourceSet ->
@@ -183,6 +188,11 @@ class CeylonAndroidPlugin implements Plugin<Project> {
         project.plugins.findPlugin('android-library')
 
     return plugin as BasePlugin
+  }
+
+  @CompileStatic
+  static Plugin getCeylonPlugin(Project project) {
+    return project.plugins.findPlugin('com.athaydes.ceylon')
   }
 
   @CompileStatic
