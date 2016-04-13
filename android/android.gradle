@@ -16,13 +16,10 @@
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
-//apply plugin: 'com.athaydes.ceylon'
 apply plugin: 'idea'
+apply from: "$rootDir/gradle/versionFile.gradle"
 apply from: "$rootDir/gradle/publishing.gradle"
 apply from: "$rootDir/gradle/bintray.gradle"
-apply from: "$rootDir/gradle/artifactory.gradle"
-apply from: "$rootDir/gradle/versionFile.gradle"
-//apply from: "$rootDir/gradle/codenarc.gradle"
 
 description = 'Ceylon support for Android with the Gradle build tool - http://ceylon-lang.org'
 
@@ -47,12 +44,6 @@ task fullTest(type: Test) {
   group = 'Verification'
   dependsOn check
   systemProperty 'allTests', true
-}
-
-task release {
-  description = 'Releases a version of the plugin on Artifactory and Bintray'
-  group = 'Publishing'
-  dependsOn artifactoryPublish, bintrayUpload, rootProject.tasks.tagRelease
 }
 
 tasks.withType(Test) {

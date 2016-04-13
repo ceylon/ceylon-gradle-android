@@ -14,39 +14,29 @@
  * limitations under the License.
  */
 
-// Handles publication of distributions to Bintray
-
 apply plugin: 'com.jfrog.bintray'
 
 def attr = { String name -> project."$name" }
 
 bintray {
-    user = bintrayUsername
-    key = bintrayKey
-    publications = ['mavenJava']
-    pkg {
-        repo = attr 'project_bintray_repo'
-        name = attr 'name'
-        desc = attr 'project_description'
-        userOrg = attr 'project_bintray_org'
-        licenses = ['Apache-2.0']
-        labels = ['android','groovy']
-        /*
-        publicDownloadNumbers = true
-        version {
-            repo = attr 'project_bintray_repo'
-            userOrg = attr 'project_bintray_org'
-            name = attr 'name'
-            desc = attr 'project_description'
-            licenses = ['Apache-2.0']
-            labels = ['gradle', 'plugin']
-            websiteUrl = attr 'project_url'
-            issueTrackerUrl = attr 'project_issues_url'
-            vcsUrl = attr 'project_scm'
-            vcsTag = attr 'version'
-            attributes = [
-                    'gradle-plugin': 'me.champeau.gradle.groovy-android:me.champeau.gradle:gradle-groovy-android-plugin'
-            ]
-        }*/
+  user = property('bintray.user')
+  key = property('bintray.key')
+  publications = ['mavenJava']
+  pkg {
+    repo = attr 'project_bintray_repo'
+    name = attr 'project_bintray_name'
+    desc = attr 'project_description'
+    licenses = ['Apache-2.0']
+    labels = ['android','ceylon']
+    version {
+      name = attr 'version'
+      desc = attr 'project_description'
+      released  = new Date()
+      vcsTag = attr 'version'
+      vcsUrl = attr 'project_scm'
+      websiteUrl = attr 'project_url'
+//      attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
     }
+  }
 }
+

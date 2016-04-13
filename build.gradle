@@ -15,23 +15,21 @@
  */
 
 buildscript {
-  repositories {
-    jcenter()
-  }
-
   dependencies {
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
-    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
     classpath 'com.android.tools.build:gradle:1.5.0'
     classpath "com.athaydes.gradle.ceylon:ceylon-gradle-plugin:1.1.2"
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.4.3'
   }
 }
 
+plugins {
+  id "com.jfrog.bintray" version "1.6"
+}
+
 apply from: "$rootDir/gradle/idea/idea.gradle"
 
 allprojects {
-  version = '0.0.1-SNAPSHOT'
+  version = '0.0.1'
   group = 'com.redhat.ceylon.gradle'
 
   apply from: "$rootDir/gradle/credentials.gradle"
@@ -39,7 +37,6 @@ allprojects {
 
 subprojects {
   apply from: "$rootDir/gradle/projectLocalRepo.gradle"
-//  apply from: "$rootDir/gradle/androidGroovyLocal.gradle"
 
   repositories {
     jcenter()
@@ -71,3 +68,4 @@ String getAndroidPluginVersion() {
     it.moduleGroup == 'com.android.tools.build' && it.moduleName == 'gradle'
   }.moduleVersion
 }
+
