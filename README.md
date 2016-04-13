@@ -18,7 +18,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
-        classpath 'com.redhat.ceylon.gradle:android:0.0.1-SNAPSHOT'
+        classpath 'com.redhat.ceylon.gradle:android:0.0.1'
     }
 }
 
@@ -33,7 +33,7 @@ ceylon {
 }
 ```
 
-then use the `assembleDebug` task to test.
+then use the `build` task to test.
 
 Should you want to test development versions of the plugin, you can add the snapshot repository and depend on a SNAPSHOT:
 
@@ -65,17 +65,3 @@ Writing Ceylon code
 
 This plugin has been successfully tested with Android Studio and will make no attempts to add support for other IDEs.
 This plugin will let you write an application in Ceylon.
-
-Configuring the Ceylon compilation options
-------------------------------------------
-
-The Ceylon compilation tasks can be configured in the `androidCeylon` block using the `options` block:
-
-```groovy
-androidCeylon {
-  options {
-    sourceCompatibility	= '1.7' // as of 0.0.1 these are automatically set based off the android plugin's
-    targetCompatibility = '1.7'
-  }
-}
-```

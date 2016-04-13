@@ -15,7 +15,11 @@
  */
 
 include 'android'
-include 'sample-app'
+if(new File('build/localrepo/com/redhat/ceylon/gradle/android/').exists()){
+  include 'sample-app'
+}else{
+  print("Not including sample-app because plugin is not built yet. Build it with `./gradlew :android:build` first.\n");
+}
 
 rootProject.name = 'main'
 

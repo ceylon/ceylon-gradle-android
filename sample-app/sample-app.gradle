@@ -13,6 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+buildscript {
+  repositories {
+    jcenter()
+    maven{
+      url new File(rootProject.buildDir, 'localrepo').toURI()
+    }
+  }
+
+  dependencies {
+    classpath 'com.redhat.ceylon.gradle:android:0.0.1-SNAPSHOT'
+  }
+}
+
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.athaydes.ceylon'
