@@ -161,6 +161,8 @@ Depends: ${dependencies}
       copyTask.from(project.zipTree(fromJar))
       copyTask.include([includes])
       copyTask.destinationDir = targetFolder
+      // force it
+      copyTask.outputs.upToDateWhen { false }
       copyTask.execute()
   }
 
@@ -210,6 +212,8 @@ Depends: ${dependencies}
       def rejarTarget = new File(rejarDir, "${dep.name}-${dep.version}.jar")
       jarTask.archiveName = rejarTarget.name
       jarTask.destinationDir = rejarDir
+      // force it
+      jarTask.outputs.upToDateWhen { false }
       jarTask.execute()
       jarFile = rejarTarget
     }
