@@ -15,6 +15,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.athaydes.ceylon'
 apply plugin: 'com.redhat.ceylon.gradle.android'
 //apply from: "$rootDir/gradle/extraAndroidTasks.gradle"
 apply plugin: 'com.getkeepsafe.dexcount'
@@ -67,12 +68,10 @@ android {
   }
 }
 
-androidCeylon {
-  options {
-//    configure(ceylonOptions) {
-      // forkOptions.jvmArgs = ['-noverify']
-//    }
-  }
+ceylon {
+    // Optional, needs to point to Ceylon 1.2.3+
+    ceylonLocation "../../ceylon/dist/dist/bin/ceylon"
+    module "fr.epardaud.testjava.testjava/1"
 }
 
 dependencies {
