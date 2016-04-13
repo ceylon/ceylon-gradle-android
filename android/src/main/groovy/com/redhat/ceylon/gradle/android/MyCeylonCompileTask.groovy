@@ -20,6 +20,7 @@ import com.android.build.api.transform.QualifiedContent
 import com.android.build.gradle.internal.pipeline.OriginalStream
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.BaseVariantOutputData
+import com.android.builder.dependency.JarDependency
 import com.android.sdklib.IAndroidTarget
 import com.athaydes.gradle.ceylon.CeylonConfig
 import com.athaydes.gradle.ceylon.util.CeylonRunner
@@ -68,6 +69,7 @@ Depends: ${dependencies}
     project.logger.info("Compiling Ceylon classes in "+ this.source.asPath)
     project.logger.info("Ceylon classpath is "+ classpath.asPath)
     project.logger.info("Ceylon source folders is "+ sourceFolders)
+
     def moduleFinder = new FileNameFinder();
     def foundModule = false;
     for(sourceFolder in sourceFolders){
@@ -131,6 +133,9 @@ Depends: ${dependencies}
         // FIXME: configurable
         if(f.name.startsWith("com.redhat.ceylon.model-"))
           extractResources(f, "com/redhat/ceylon/model/cmr/package-list*", resources)
+
+        // make sure we add it there for the linter to put it in the classpath
+        this.variant.variantDependency.addJars(Arrays.asList(new JarDependency(f, true, true, null, null)));
       }
       streamBuilder.addScope(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
       streamBuilder.addContentType(QualifiedContent.DefaultContentType.CLASSES)
