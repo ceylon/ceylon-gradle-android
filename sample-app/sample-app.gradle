@@ -22,7 +22,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.redhat.ceylon.gradle:android:0.0.1-SNAPSHOT'
+    classpath 'com.redhat.ceylon.gradle:android:0.0.2-SNAPSHOT'
   }
 }
 
