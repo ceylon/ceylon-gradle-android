@@ -19,6 +19,7 @@ apply plugin: 'maven'
 apply plugin: 'idea'
 apply from: "$rootDir/gradle/versionFile.gradle"
 apply from: "$rootDir/gradle/publishing.gradle"
+apply from: "$rootDir/gradle/credentials.gradle"
 apply from: "$rootDir/gradle/bintray.gradle"
 
 description = 'Ceylon support for Android with the Gradle build tool - http://ceylon-lang.org'

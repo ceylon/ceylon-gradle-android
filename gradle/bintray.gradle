@@ -19,8 +19,8 @@ apply plugin: 'com.jfrog.bintray'
 def attr = { String name -> project."$name" }
 
 bintray {
-  user = property('bintray.user')
-  key = property('bintray.key')
+  user = bintrayUsername
+  key = bintrayKey
   publications = ['mavenJava']
   pkg {
     repo = attr 'project_bintray_repo'
