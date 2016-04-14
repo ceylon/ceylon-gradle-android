@@ -126,11 +126,7 @@ Depends: ${dependencies}
           continue
         if(depLibs.contains(f.name))
           continue
-        // FIXME: configurable
-        if(f.name.startsWith("com.redhat.ceylon.maven-support-"))
-          continue;
         jarFiles.add(f)
-        // FIXME: configurable
         if(f.name.startsWith("com.redhat.ceylon.model-"))
           extractResources(f, "com/redhat/ceylon/model/cmr/package-list*", resources)
 
