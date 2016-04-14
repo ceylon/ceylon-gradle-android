@@ -35,6 +35,10 @@ bintray {
       vcsTag = attr 'version'
       vcsUrl = attr 'project_scm'
       websiteUrl = attr 'project_url'
+      gpg {
+        sign = true
+//        passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
+      }
 //      attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
     }
   }
