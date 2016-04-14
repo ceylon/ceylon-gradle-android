@@ -29,6 +29,7 @@ import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceTask
+import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.AbstractCompile
 
@@ -114,10 +115,20 @@ Depends: ${dependencies}
     for(dep in deps.values()){
       depLibs.add(dep.name+"-"+dep.version+".jar");
     }
+    def dexTasks = new LinkedList<Task>();
 
     project.tasks.matching {
-      it.name.contains('Dex') && !it.name.contains("DexMethods") && it.variantName == variant.name
+      it.name.contains('Dex') && !it.name.contains("DexMethods") && !it.name.contains("incremental") && it.variantName == variant.name
     }.each { dx ->
+      dexTasks.add(dx)
+    }
+
+    for(f in mlib.listFiles()){
+      if(f.name.endsWith(".jar") && !depLibs.contains(f.name) && f.name.startsWith("com.redhat.ceylon.model-"))
+        extractResources(f, "com/redhat/ceylon/model/cmr/package-list*", resources)
+    }
+
+    dexTasks.each { dx ->
       def streamBuilder = new OriginalStream.Builder()
 
       def jarFiles = new LinkedList<File>()
@@ -127,8 +138,6 @@ Depends: ${dependencies}
         if(depLibs.contains(f.name))
           continue
         jarFiles.add(f)
-        if(f.name.startsWith("com.redhat.ceylon.model-"))
-          extractResources(f, "com/redhat/ceylon/model/cmr/package-list*", resources)
 
         // make sure we add it there for the linter to put it in the classpath
         this.variant.variantDependency.addJars(Arrays.asList(new JarDependency(f, true, true, null, null)));
