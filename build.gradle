@@ -29,7 +29,7 @@ plugins {
 apply from: "$rootDir/gradle/idea/idea.gradle"
 
 allprojects {
-  version = '0.0.2-SNAPSHOT'
+  version = '0.0.4'
   group = 'com.redhat.ceylon.gradle'
 
   apply from: "$rootDir/gradle/credentials.gradle"
