@@ -12,14 +12,14 @@ shared class MainActivity() extends AppCompatActivity() {
 
     shared actual void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.\Ilayout.activity_main);
-        assert(is Toolbar toolbar = findViewById(R.\Iid.toolbar));
+        setContentView(R.Layout.activity_main);
+        assert(is Toolbar toolbar = findViewById(R.Id.toolbar));
         setSupportActionBar(toolbar);
 
-        assert(is FloatingActionButton fab = findViewById(R.\Iid.fab));
+        assert(is FloatingActionButton fab = findViewById(R.Id.fab));
         fab.setOnClickListener(object satisfies OnClickListener {
             shared actual void onClick(View view) {
-//                Snackbar.make(view, javaString("Hello from Ceylon: "+`MainActivity`.string), Snackbar.\iLENGTH_LONG)
+//                Snackbar.make(view, javaString("Hello from Ceylon: "+`MainActivity`.string), Snackbar.lengthLong)
 //                        .setAction(javaString("Action"), null).show();
 		Intent intent = Intent(outer, javaClass<Main2Activity>());
                 startActivity(intent);
@@ -29,7 +29,7 @@ shared class MainActivity() extends AppCompatActivity() {
 
     shared actual Boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.\Imenu.menu_main, menu);
+        menuInflater.inflate(R.Menu.menu_main, menu);
         return true;
     }
 
@@ -40,7 +40,7 @@ shared class MainActivity() extends AppCompatActivity() {
         Integer id = item.itemId;
 
         //noinspection SimplifiableIfStatement
-        if (id == R.\Iid.action_settings) {
+        if (id == R.Id.action_settings) {
             return true;
         }
 

@@ -11,9 +11,9 @@ shared class Main2Activity() extends ListActivity() {
 
     shared actual void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.\Ilayout.activity_main2);
+        setContentView(R.Layout.activity_main2);
 
-        ListAdapter adapter = ArrayAdapter<JString>(this, AndroidR.\Ilayout.simple_list_item_1,
+        ListAdapter adapter = ArrayAdapter<JString>(this, AndroidR.Layout.simple_list_item_1,
                 createJavaStringArray { for (mod in modules.list) mod.string });
         listAdapter = adapter;
     }
