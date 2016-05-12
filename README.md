@@ -18,13 +18,27 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
-        classpath 'com.redhat.ceylon.gradle:android:0.0.1'
+        classpath 'com.redhat.ceylon.gradle:android:0.0.4'
     }
 }
+```
 
+And your `app/build.gradle` file with:
+
+```groovy
 apply plugin: 'com.android.application'
 apply plugin: 'com.athaydes.ceylon'
 apply plugin: 'com.redhat.ceylon.gradle.android'
+
+android {
+    // ...
+    sourceSets {
+        main.java.srcDirs += 'src/main/ceylon'
+    }
+    lintOptions {
+        disable 'InvalidPackage' // lint sees references in the Ceylon jar to unavailable java classes
+    }
+}
 
 ceylon {
     // Optional, needs to point to Ceylon 1.2.3+
