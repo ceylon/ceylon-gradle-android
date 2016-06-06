@@ -227,6 +227,10 @@ Depends: ${dependencies}
 
     options << "--out=${androidRepo.absolutePath}"
 
+    if(conf.forceImports){
+      options << "--force"
+    }
+
     if(descriptorFile.exists()){
       options << "--descriptor=${descriptorFile.absolutePath}"
     }

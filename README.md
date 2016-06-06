@@ -18,7 +18,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
-        classpath 'com.redhat.ceylon.gradle:android:0.0.4'
+        classpath 'com.redhat.ceylon.gradle:android:0.0.5'
     }
 }
 ```
@@ -44,6 +44,11 @@ ceylon {
     // Optional, needs to point to Ceylon 1.2.3+
     // ceylonLocation "/usr/bin/ceylon"
     module "com.my.module/1.0"
+    // Optional: set to true if you have Maven dependencies with broken
+    // descriptors or optional dependencies (which Gradle does not support),
+    // which will typically cause the import-jar tasks to fail. This will
+    // force the import by bypassing checks.
+    // forceImports false
 }
 ```
 
