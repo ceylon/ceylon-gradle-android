@@ -85,24 +85,39 @@ Depends: ${dependencies}
       return;
     }
     def conf = project.configurations.getByName("compile");
+    def aptConf = project.configurations.getByName("apt");
 
     def androidPlugin = CeylonAndroidPlugin.getAndroidBasePlugin(project)
     def androidJar = androidPlugin.androidBuilder.target.getPath(IAndroidTarget.ANDROID_JAR)
     def androidVersion = androidPlugin.androidBuilder.target.version.apiString
 
-    Map<String, Dep> deps = new HashMap<>();
+    Map<String, Dep> deps = new HashMap<>()
+    initDeps(deps, androidVersion, androidJar)
+    Map<String, Dep> aptDeps = new HashMap<>()
+    initDeps(aptDeps, androidVersion, androidJar)
+    List<String> aptModules = new LinkedList<>();
+    conf.resolvedConfiguration.firstLevelModuleDependencies.each{ dep -> importDependency(dep, deps, androidVersion, false) }
+    aptConf.resolvedConfiguration.firstLevelModuleDependencies.each{ dep ->
+      importDependency(dep, aptDeps, androidVersion, true)
+      def ceylonModuleName = dep.moduleGroup+"."+dep.moduleName
+      def key = ceylonModuleName + "/" + dep.moduleVersion
+      aptModules.add(key);
+    }
+
+    CeylonConfig ceylonConfig = project.extensions.findByName('ceylon') as CeylonConfig
+    importJarRepository(deps, ceylonConfig, "repository")
+    importJarRepository(aptDeps, ceylonConfig, "apt-repository")
+    runCompiler(androidVersion, ceylonConfig, aptModules)
+    runMlib(ceylonConfig)
+    addMlibJarsToDex(deps)
+  }
+
+  def initDeps(HashMap<String, Dep> deps, String androidVersion, String androidJar) {
     def androidDep = new Dep()
     androidDep.version = androidVersion
     androidDep.name = "android"
     androidDep.jar = new File(androidJar)
     deps.put("android/"+androidVersion, androidDep)
-    conf.resolvedConfiguration.firstLevelModuleDependencies.each{ dep -> importDependency(dep, deps, androidVersion) }
-
-    CeylonConfig ceylonConfig = project.extensions.findByName('ceylon') as CeylonConfig
-    importJarRepository(deps, ceylonConfig)
-    runCompiler(androidVersion, ceylonConfig)
-    runMlib(ceylonConfig)
-    addMlibJarsToDex(deps)
   }
 
   void addMlibJarsToDex(Map<String, Dep> deps) {
@@ -171,7 +186,7 @@ Depends: ${dependencies}
       copyTask.execute()
   }
 
-  def importJarRepository(Map<String, Dep> deps, CeylonConfig conf) {
+  def importJarRepository(Map<String, Dep> deps, CeylonConfig conf, String repoName) {
     def imported = new HashSet<String>();
 
     while(imported.size() != deps.size()) {
@@ -182,14 +197,15 @@ Depends: ${dependencies}
         throw new RuntimeException("Failed to find importable dependency from: "+deps)
       for (importableKey in canImport) {
         def dep = deps.get(importableKey)
-        importJar(dep, deps, conf);
+        importJar(dep, deps, conf, repoName);
         imported.add(importableKey);
       }
     }
   }
 
-  def importJar(Dep dep, Map<String, Dep> deps, CeylonConfig conf) {
-    def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/repository")
+  def importJar(Dep dep, Map<String, Dep> deps, CeylonConfig conf, String repoName) {
+    System.err.println("Importing ${dep.name}/${dep.version}")
+    def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/${repoName}")
     def descriptorsDir = new File(project.buildDir, "intermediates/ceylon-android/descriptors")
     androidRepo.mkdirs()
     descriptorsDir.mkdirs()
@@ -210,7 +226,7 @@ Depends: ${dependencies}
       def rejarDir = new File(project.buildDir, "intermediates/ceylon-android/jars")
       rejarDir.mkdirs()
       def resourcesDir = new File(project.buildDir, "intermediates/classes/debug")
-      def jarTask = project.tasks.create("Rejar ${dep.name} for ${variant.name}", Jar)
+      def jarTask = project.tasks.create("Rejar ${dep.name} for ${variant.name} in ${repoName}", Jar)
       jarTask.from(project.zipTree(dep.jar))
       def includes = dep.resourcePackage.replace('.', '/')+"/*.class"
       jarTask.from(project.fileTree(dir: resourcesDir, includes: [includes]))
@@ -240,7 +256,7 @@ Depends: ${dependencies}
     CeylonRunner.run("import-jar", "", project, conf, options)
   }
 
-  def importDependency(ResolvedDependency dep, Map<String, Dep> deps, String androidVersion){
+  def importDependency(ResolvedDependency dep, Map<String, Dep> deps, String androidVersion, boolean forApt){
     def ceylonModuleName = dep.moduleGroup+"."+dep.moduleName
     def key = ceylonModuleName + "/" + dep.moduleVersion
     if(deps.containsKey(key))
@@ -249,9 +265,11 @@ Depends: ${dependencies}
     deps.put(key, newDep)
     newDep.name = ceylonModuleName
     newDep.version = dep.moduleVersion
+    System.err.println("Importing dep "+dep+" for apt: "+forApt)
     for(dep2 in dep.children){
       String depKey = "${dep2.moduleGroup}.${dep2.moduleName}/${dep2.moduleVersion}"
       newDep.dependencies.add(depKey)
+      System.err.println(" -> "+dep2)
     }
     newDep.dependencies.add("android/"+androidVersion)
     // FIXME: barf if there's more than one artifact
@@ -297,11 +315,12 @@ Depends: ${dependencies}
         newDep.jar = art.file
       }
     }
-    dep.children.each{ dep2 -> importDependency(dep2, deps, androidVersion) }
+    dep.children.each{ dep2 -> importDependency(dep2, deps, androidVersion, forApt) }
   }
 
-  def runCompiler(androidVersion, CeylonConfig conf) {
+  def runCompiler(androidVersion, CeylonConfig conf, List<String> aptModules) {
     def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/repository")
+    def aptRepo = new File(project.buildDir, "intermediates/ceylon-android/apt-repository")
     def outputRepo = new File(project.buildDir, "intermediates/ceylon-android/modules")
     List<String> args = new ArrayList<>()
     // FIXME: prepopulate ceylon repo androidRepo
@@ -311,7 +330,10 @@ Depends: ${dependencies}
     options << "--rep=${androidRepo.absolutePath}"
     options << "--out=${outputRepo.absolutePath}"
     options << "--jdk-provider=android/${androidVersion}"
-    sourceFolders.each { options << "--src $it.absolutePath" }
+    sourceFolders.each { options << "--src=$it.absolutePath" }
+    aptModules.each { options << "--apt=$it" }
+    if(!aptModules.empty)
+      options << "--rep=${aptRepo.absolutePath}"
 
     CeylonRunner.run("compile", "", project, conf, options)
   }
