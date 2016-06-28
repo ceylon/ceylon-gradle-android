@@ -7,10 +7,14 @@ import android.content { Intent }
 import dalvik.system { DexFile }
 import ceylon.interop.java { javaString, javaClass }
 import java.lang { CharSequence }
+import butterknife { ButterKnife, bindView }
 
 shared class MainActivity() extends AppCompatActivity() {
 
-    shared actual void onCreate(Bundle savedInstanceState) {
+  @packageProtected
+  shared late bindView(R.Id.toolbar) Toolbar toolbar;
+
+  shared actual void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.Layout.activity_main);
         assert(is Toolbar toolbar = findViewById(R.Id.toolbar));
