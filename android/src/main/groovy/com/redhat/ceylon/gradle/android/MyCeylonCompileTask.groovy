@@ -286,6 +286,8 @@ Depends: ${dependencies}
           newDep.needsResourceClasses = true
           // what package is it?
           def explodedResourceAndroidXml = new File(explodedAar, "aapt/AndroidManifest.xml")
+          if(!explodedResourceAndroidXml.exists())
+            explodedResourceAndroidXml = new File(explodedAar, "AndroidManifest.xml")
           def parser = new XmlSlurper()
           def root = parser.parse(explodedResourceAndroidXml)
           newDep.resourcePackage = root.@package
