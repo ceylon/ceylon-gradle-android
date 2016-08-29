@@ -85,7 +85,7 @@ Depends: ${dependencies}
       return;
     }
     def conf = project.configurations.getByName("compile");
-    def aptConf = project.configurations.getByName("apt");
+    def aptConf = project.configurations.findByName("apt");
 
     def androidPlugin = CeylonAndroidPlugin.getAndroidBasePlugin(project)
     def androidJar = androidPlugin.androidBuilder.target.getPath(IAndroidTarget.ANDROID_JAR)
@@ -97,11 +97,13 @@ Depends: ${dependencies}
     initDeps(aptDeps, androidVersion, androidJar)
     List<String> aptModules = new LinkedList<>();
     conf.resolvedConfiguration.firstLevelModuleDependencies.each{ dep -> importDependency(dep, deps, androidVersion, false) }
-    aptConf.resolvedConfiguration.firstLevelModuleDependencies.each{ dep ->
-      importDependency(dep, aptDeps, androidVersion, true)
-      def ceylonModuleName = dep.moduleGroup+"."+dep.moduleName
-      def key = ceylonModuleName + "/" + dep.moduleVersion
-      aptModules.add(key);
+    if(aptConf != null){
+      aptConf.resolvedConfiguration.firstLevelModuleDependencies.each { dep ->
+        importDependency(dep, aptDeps, androidVersion, true)
+        def ceylonModuleName = dep.moduleGroup + "." + dep.moduleName
+        def key = ceylonModuleName + "/" + dep.moduleVersion
+        aptModules.add(key);
+      }
     }
 
     CeylonConfig ceylonConfig = project.extensions.findByName('ceylon') as CeylonConfig
