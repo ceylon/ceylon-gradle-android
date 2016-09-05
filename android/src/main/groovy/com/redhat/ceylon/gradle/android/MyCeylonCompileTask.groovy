@@ -217,7 +217,7 @@ Depends: ${dependencies}
     // FIXME: add JDK imports, but how?
     for(imp in dep.dependencies){
       def imported = deps.get(imp)
-      // FIXME: deal with otionals
+      // FIXME: deal with optionals
       descriptorFile.append("+"+imported.name+"="+imported.version+"\n")
     }
 
@@ -334,7 +334,11 @@ Depends: ${dependencies}
     options << "--rep=${androidRepo.absolutePath}"
     options << "--out=${outputRepo.absolutePath}"
     options << "--jdk-provider=android/${androidVersion}"
+
     sourceFolders.each { options << "--src=$it.absolutePath" }
+    def javaSourceSetPath = project.file("src/main/java")
+    options << "--src=$javaSourceSetPath.absolutePath"
+
     aptModules.each { options << "--apt=$it" }
     if(!aptModules.empty)
       options << "--rep=${aptRepo.absolutePath}"

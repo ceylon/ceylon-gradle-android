@@ -29,15 +29,14 @@ import org.gradle.util.ConfigureUtil
 //import com.athaydes.gradle.ceylon.task.CompileCeylonTask
 
 /**
- * Configuration specific to the Groovy+Android plugin.
+ * Configuration specific to the Ceylon+Android plugin.
  */
 class CeylonAndroidExtension {
 
   /**
-   * Setting this flag to true will have only groovyc run instead of javac then groovyc run
-   * This will effectively have all code (java and groovy) be joint compiled. This is
-   * useful for adding groovy into older projects, and for having generated
-   * code be able to utilize groovy code.
+   * Setting this flag to true will have only the ceylon compiler run instead of javac then ceylon run
+   * This will effectively have all code (java and ceylon) be joint compiled. This is
+   * required if you mix Java and Ceylon code in different source folders
    *
    * @param skipJavaC
    */

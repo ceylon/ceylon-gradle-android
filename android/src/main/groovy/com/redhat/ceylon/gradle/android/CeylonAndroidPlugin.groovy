@@ -101,6 +101,7 @@ class CeylonAndroidPlugin implements Plugin<Project> {
       BaseExtension androidExtension, BasePlugin androidPlugin) {
     project.logger.debug("%s", androidExtension)
     project.logger.debug("%s", androidPlugin)
+    def javaSourceSetPath = project.file("src/main/java")
 
     variantDataList.each { variantData ->
       def variantDataName = variantData.name
@@ -128,7 +129,7 @@ class CeylonAndroidPlugin implements Plugin<Project> {
 //      ceylonTask.ceylonClasspath = javaTask.classpath
 
 
-      def additionalSourceFiles = getGeneratedSourceDirs(variantData)
+      def additionalSourceDirs = getGeneratedSourceDirs(variantData)
 
       def providers = variantData.variantConfiguration.sortedSourceProviders
       providers.each { SourceProvider provider ->
@@ -145,16 +146,23 @@ class CeylonAndroidPlugin implements Plugin<Project> {
         List<File> generatedSourceForOurPackage = new LinkedList<>()
         if(thisPackage != null){
           String path = thisPackage.replace('.','/')
-          for(dir in additionalSourceFiles){
+          for(dir in additionalSourceDirs){
             generatedSourceForOurPackage.add(new File(dir, path))
           }
         }
+        List<File> javaSourceForOurPackage = new LinkedList<>()
+        if(thisPackage != null){
+          String path = thisPackage.replace('.','/')
+          javaSourceForOurPackage.add(new File(javaSourceSetPath, path))
+        }
 
-        // Exclude any java files that may be included in both java and groovy source sets
+        // Exclude any java files that may be included in both java and ceylon source sets
         javaTask.exclude { file ->
           project.logger.debug("Exclude java file $file.file")
           project.logger.debug("Exclude against ceylon files $ceylonSourceSet.ceylon.files")
-          file.file in ceylonSourceSet.ceylon.files || file.file in generatedSourceForOurPackage
+          project.logger.debug("Exclude against generated files $generatedSourceForOurPackage")
+          project.logger.debug("Exclude against java files $javaSourceForOurPackage")
+          file.file in ceylonSourceSet.ceylon.files || file.file in generatedSourceForOurPackage || file.file in javaSourceForOurPackage
         }
 
         if (extension.skipJavaC) {
@@ -167,8 +175,8 @@ class CeylonAndroidPlugin implements Plugin<Project> {
 
 
       project.logger.info("Variant data: "+variantData)
-      project.logger.info("Additional source files: "+additionalSourceFiles)
-      ceylonTask.source(*additionalSourceFiles)
+      project.logger.info("Additional source dirs: "+additionalSourceDirs)
+      ceylonTask.source(*additionalSourceDirs)
 
       ceylonTask.doFirst { MyCeylonCompileTask task ->
         def androidRunTime = project.files(getRuntimeJars(androidPlugin, androidExtension))

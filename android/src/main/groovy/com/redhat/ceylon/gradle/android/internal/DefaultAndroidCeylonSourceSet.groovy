@@ -36,7 +36,7 @@ class DefaultAndroidCeylonSourceSet implements AndroidCeylonSourceSet {
     ceylon.filter.include("**/*.java", "**/*.ceylon")
     allCeylon = new DefaultSourceDirectorySet(String.format("%s Ceylon source", displayName), fileResolver)
     allCeylon.source(ceylon)
-    allCeylon.filter.include("**/*.ceylon")
+    allCeylon.filter.include("**/*.java", "**/*.ceylon")
   }
 
   @Override AndroidCeylonSourceSet ceylon(Closure configureClosure) {
