@@ -206,22 +206,32 @@ Depends: ${dependencies}
   }
 
   def importJar(Dep dep, Map<String, Dep> deps, CeylonConfig conf, String repoName) {
-    System.err.println("Importing ${dep.name}/${dep.version}")
+    project.logger.info("Importing ${dep.name}/${dep.version}")
     def androidRepo = new File(project.buildDir, "intermediates/ceylon-android/${repoName}")
     def descriptorsDir = new File(project.buildDir, "intermediates/ceylon-android/descriptors")
     androidRepo.mkdirs()
     descriptorsDir.mkdirs()
 
     def descriptorFile = new File(descriptorsDir, "${dep.name}.properties")
-    descriptorFile.delete()
-    // FIXME: add JDK imports, but how?
-    for(imp in dep.dependencies){
-      def imported = deps.get(imp)
-      // FIXME: deal with optionals
-      descriptorFile.append("+"+imported.name+"="+imported.version+"\n")
+    if(descriptorFile.exists() && descriptorFile.lastModified() >= dep.jar.lastModified()){
+      project.logger.info(" (Skipping property descriptor generation: already done)")
+    }else{
+      descriptorFile.delete()
+      // FIXME: add JDK imports, but how?
+      for(imp in dep.dependencies){
+        def imported = deps.get(imp)
+        // FIXME: deal with optionals
+        descriptorFile.append("+"+imported.name+"="+imported.version+"\n")
+      }
     }
 
     def jarFile = dep.jar
+
+    def targetFile = new File(androidRepo, ceylonRepoModuleFile(dep.name, dep.version, "jar"));
+    if(targetFile.exists() && targetFile.lastModified() >= jarFile.lastModified()){
+      project.logger.info(" (Skipping import-jar: already done)")
+      return;
+    }
 
     if(dep.needsResourceClasses){
       // we need to rejar it with resource classes
@@ -258,6 +268,14 @@ Depends: ${dependencies}
     CeylonRunner.run("import-jar", "", project, conf, options)
   }
 
+  def ceylonRepoModuleFile(String module, String version, String extension){
+    return module.replace(".","/")+
+      "/"+version+
+      "/"+module+
+      "-"+version+
+      "."+extension;
+  }
+
   def importDependency(ResolvedDependency dep, Map<String, Dep> deps, String androidVersion, boolean forApt){
     def ceylonModuleName = dep.moduleGroup+"."+dep.moduleName
     def key = ceylonModuleName + "/" + dep.moduleVersion
@@ -267,11 +285,11 @@ Depends: ${dependencies}
     deps.put(key, newDep)
     newDep.name = ceylonModuleName
     newDep.version = dep.moduleVersion
-    System.err.println("Importing dep "+dep+" for apt: "+forApt)
+    project.logger.info("Analysing dep "+dep+" for apt: "+forApt)
     for(dep2 in dep.children){
       String depKey = "${dep2.moduleGroup}.${dep2.moduleName}/${dep2.moduleVersion}"
       newDep.dependencies.add(depKey)
-      System.err.println(" -> "+dep2)
+      project.logger.info(" -> "+dep2)
     }
     newDep.dependencies.add("android/"+androidVersion)
     // FIXME: barf if there's more than one artifact
