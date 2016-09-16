@@ -18,7 +18,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
-        classpath 'com.redhat.ceylon.gradle:android:0.0.5'
+        classpath 'com.redhat.ceylon.gradle:android:1.0.0'
     }
 }
 ```
