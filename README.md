@@ -17,8 +17,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
-        classpath 'com.redhat.ceylon.gradle:android:2.2.0'
+        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath 'com.redhat.ceylon.gradle:android:1.0.1'
     }
 }
 ```
@@ -41,7 +41,7 @@ android {
 }
 
 ceylon {
-    // Optional, needs to point to Ceylon 1.2.3+
+    // Optional, needs to point to Ceylon 1.3.0+
     // ceylonLocation "/usr/bin/ceylon"
     module "com.my.module/1.0"
     // Optional: set to true if you have Maven dependencies with broken
