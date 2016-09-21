@@ -248,7 +248,9 @@ class CeylonAndroidPlugin implements Plugin<Project> {
       result << variantData.scope.aidlSourceOutputDir
     }
 
-    if (variantData.scope.globalScope.extension.dataBinding.enabled) {
+    // We use getter instead of property for globalScope
+    // since property returns TransformGlobalScope instead of GlobalScope.
+    if (variantData.scope.getGlobalScope().extension.dataBinding.enabled) {
       result << variantData.scope.classOutputForDataBinding
     }
 

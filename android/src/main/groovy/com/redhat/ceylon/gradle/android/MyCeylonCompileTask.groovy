@@ -20,7 +20,10 @@ import com.android.build.api.transform.QualifiedContent
 import com.android.build.gradle.internal.pipeline.OriginalStream
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.BaseVariantOutputData
+import com.android.builder.core.VariantConfiguration
+import com.android.builder.dependency.DependencyContainerImpl
 import com.android.builder.dependency.JarDependency
+import com.android.builder.model.JavaLibrary
 import com.android.sdklib.IAndroidTarget
 import com.athaydes.gradle.ceylon.CeylonConfig
 import com.athaydes.gradle.ceylon.util.CeylonRunner
@@ -145,6 +148,12 @@ Depends: ${dependencies}
         extractResources(f, "com/redhat/ceylon/model/cmr/package-list*", resources)
     }
 
+    boolean isJarDepFileConstructor = false;
+    try{
+      JarDependency.class.getConstructor(File.class);
+      isJarDepFileConstructor = true;
+    }catch(NoSuchMethodException x){}
+
     dexTasks.each { dx ->
       def streamBuilder = new OriginalStream.Builder()
 
@@ -156,8 +165,21 @@ Depends: ${dependencies}
           continue
         jarFiles.add(f)
 
-        // make sure we add it there for the linter to put it in the classpath
-        this.variant.variantDependency.addJars(Arrays.asList(new JarDependency(f, true, true, null, null)));
+        JarDependency dep;
+        if (isJarDepFileConstructor) {
+          dep = new JarDependency(f);
+          def jars = new ArrayList<JavaLibrary>(this.variant.variantDependency.packageDependencies.jarDependencies);
+          jars.add(dep);
+          this.variant.variantDependency.packageDependencies = new DependencyContainerImpl(
+            this.variant.variantDependency.packageDependencies.androidDependencies,
+            jars,
+            this.variant.variantDependency.packageDependencies.localDependencies
+          );
+        }else{
+          dep = new JarDependency(f, true, true, null, null);
+          // make sure we add it there for the linter to put it in the classpath
+          this.variant.variantDependency.addJars(Arrays.asList(dep));
+        }
       }
       streamBuilder.addScope(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
       streamBuilder.addContentType(QualifiedContent.DefaultContentType.CLASSES)
